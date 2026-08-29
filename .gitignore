@@ -1,0 +1,12 @@
+.cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.DS_Store
+.vscode/
+.idea/
+
+# Generated simulation output (keep the directory)
+output/*
+!output/.gitkeep
+!output/.gitignore
