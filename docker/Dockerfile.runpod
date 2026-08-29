@@ -1,0 +1,40 @@
+# Isaac Sim 6.0.1 image for RunPod (Linux/amd64).
+# Build this on GitHub Actions, not on a Mac. Pulling NGC requires an NGC API key.
+#
+#   docker build --platform linux/amd64 -f docker/Dockerfile.runpod -t isaac-sim-demonstrator:latest .
+#
+# Setting ACCEPT_EULA=Y accepts the NVIDIA Omniverse license:
+# https://docs.omniverse.nvidia.com/platform/latest/common/nvidia-omniverse-license-agreement.html
+
+FROM --platform=linux/amd64 nvcr.io/nvidia/isaac-sim:6.0.1
+
+USER root
+
+ENV ACCEPT_EULA=Y \
+    PRIVACY_CONSENT=Y \
+    DEBIAN_FRONTEND=noninteractive \
+    ISAAC_DEMO_OUTPUT=/workspace/isaac-sim-demonstrator/output
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        openssh-server \
+        rsync \
+        vim \
+        git \
+        curl \
+    && mkdir -p /run/sshd /var/run/sshd \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+COPY src /workspace/isaac-sim-demonstrator/src
+COPY docker/run.sh /workspace/isaac-sim-demonstrator/docker/run.sh
+COPY docker/entrypoint.runpod.sh /usr/local/bin/entrypoint.runpod.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.runpod.sh \
+        /workspace/isaac-sim-demonstrator/docker/run.sh \
+    && mkdir -p /workspace/isaac-sim-demonstrator/output
+
+EXPOSE 22
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.runpod.sh"]

@@ -10,6 +10,8 @@ RunPod image that reports `6.0.1-rc.7`).
 APIs used: experimental Core (`Cube`, `RigidPrim`, `GroundPlane`) and
 `isaacsim.sensors.experimental.rtx` (`RtxCamera` + `CameraSensor`).
 
+To build the RunPod/GHCR image, see [docker/README.md](docker/README.md).
+
 ## Experiments
 
 | Script | PRD item | What it does |
@@ -21,10 +23,10 @@ APIs used: experimental Core (`Cube`, `RigidPrim`, `GroundPlane`) and
 
 Out of scope for this version: PX4, ROS 2, drones, LiDAR, Isaac Lab, RL.
 
-## Run on the RunPod Isaac Sim pod
+## Run
 
-You are already inside the Isaac Sim 6.0.1 container (`/isaac-sim/python.sh`
-exists). Clone or copy this repo onto the pod, then from the repo root:
+From an Isaac Sim 6.0.1 container (`/isaac-sim/python.sh` exists), at the
+repo root:
 
 ```bash
 chmod +x docker/run.sh
@@ -67,33 +69,11 @@ output/exp04_frame_01.png
 Copy them to your laptop with `scp` or the RunPod file browser. No livestream
 client is required. WebRTC usually does not work on RunPod (TCP-only ports).
 
-## Other Linux GPU hosts (Docker Compose)
-
-If the machine has Docker + NVIDIA Container Toolkit instead of an Isaac Sim
-pod image:
-
-```bash
-docker login nvcr.io
-docker pull nvcr.io/nvidia/isaac-sim:6.0.1
-./docker/run.sh exp01
-```
-
-Setting `ACCEPT_EULA=Y` in Compose accepts the
-[NVIDIA Omniverse license](https://docs.omniverse.nvidia.com/platform/latest/common/nvidia-omniverse-license-agreement.html).
-`PRIVACY_CONSENT` defaults to `Y`; export `PRIVACY_CONSENT=N` to opt out.
-
-Confirm GPU passthrough:
-
-```bash
-nvidia-smi
-docker run --rm --gpus all ubuntu nvidia-smi
-```
-
 ## Layout
 
 ```text
 isaac-sim-demonstrator/
-├── docker/                 # Compose file + run helper
+├── docker/                 # Run helper; image build notes in docker/README.md
 ├── src/                    # Standalone Python experiments
 ├── output/                 # Generated RGB images (gitignored)
 ├── PRD.md
