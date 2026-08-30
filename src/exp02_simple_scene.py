@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from common import build_simple_scene, log, play_simulation, step_and_report  # noqa: E402
+from common import build_simple_scene, finish, log, play_simulation, step_and_report  # noqa: E402
 
 STEPS = 120
 
@@ -23,4 +23,4 @@ play_simulation()
 log("Timeline playing; stepping physics.")
 step_and_report(cube, steps=STEPS, report_every=30)
 log("EXP-02 complete.")
-simulation_app.close()
+finish()

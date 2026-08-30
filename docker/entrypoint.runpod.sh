@@ -2,6 +2,10 @@
 # Keep a RunPod container alive and (optionally) start SSH using PUBLIC_KEY.
 set -euo pipefail
 
+# A Kit abort can write a multi-GB core file and OOM/kill the RunPod container
+# (which drops SSH). Disable core dumps in this image.
+ulimit -c 0 2>/dev/null || true
+
 if [[ -n "${PUBLIC_KEY:-}" ]]; then
   mkdir -p /root/.ssh
   chmod 700 /root/.ssh

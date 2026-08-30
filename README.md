@@ -89,7 +89,8 @@ isaac-sim-demonstrator/
 | `nvidia-smi` empty | GPU not passed into the container |
 | Black or empty camera images | Wait for warmup (scripts already step several frames); confirm RTX GPU |
 | First start takes 5–15 minutes | Expected shader compile |
-| `simulation_app.close()` hangs | Known Kit issue in some container runs; the experiment already finished if you saw `EXP-0N complete` |
+| `Destroying busy TaskGroup` / core dump after complete | Kit shutdown bug; ignore if you already saw `EXP-0N complete`. Scripts now exit without `close()`. |
+| SSH `closed by remote host` during Kit start | Do not launch a second `python.sh` after a crash. Reconnect, run `nvidia-smi`, kill leftover `kit` processes, then start one experiment. A core dump can fill the pod disk. |
 | Physics pose prints as not simulating | Timeline must be playing; `play_simulation()` in the scripts does this |
 
 ## Success criteria

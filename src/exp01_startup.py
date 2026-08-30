@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from common import log, log_app_info, log_gpu_info  # noqa: E402
+from common import finish, log, log_app_info, log_gpu_info  # noqa: E402
 
 log("EXP-01: Isaac Sim headless startup")
 log_gpu_info()
@@ -25,4 +25,4 @@ for index in range(5):
     log(f"simulation_app.update() {index + 1}/5")
 
 log("EXP-01 complete: Isaac Sim started headless and processed updates.")
-simulation_app.close()
+finish()

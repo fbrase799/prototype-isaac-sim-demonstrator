@@ -19,6 +19,7 @@ from common import (  # noqa: E402
     add_rgb_camera,
     build_simple_scene,
     cube_state,
+    finish,
     log,
     output_dir,
     play_simulation,
@@ -59,4 +60,4 @@ for index in range(1, STEPS + 1):
     save_rgb(rgb, out / f"exp04_frame_{captures:02d}.png")
 
 log(f"EXP-04 complete: wrote {captures} frames under {out}")
-simulation_app.close()
+finish()

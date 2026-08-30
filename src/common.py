@@ -22,6 +22,16 @@ def log(message: str) -> None:
     print(f"[isaac-demo] {message}", flush=True)
 
 
+def finish() -> None:
+    """Exit after a successful experiment.
+
+    Kit 110 often asserts in ``TaskGroup::~TaskGroup`` during
+    ``SimulationApp.close()`` in headless containers. The work is already
+    done by then, so skip close and terminate the process.
+    """
+    os._exit(0)
+
+
 def output_dir() -> Path:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     return OUTPUT_DIR

@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (  # noqa: E402
     add_rgb_camera,
     build_simple_scene,
+    finish,
     log,
     output_dir,
     play_simulation,
@@ -32,4 +33,4 @@ rgb = wait_for_rgb(sensor)
 image_path = output_dir() / "exp03_rgb.png"
 save_rgb(rgb, image_path)
 log(f"EXP-03 complete: {image_path}")
-simulation_app.close()
+finish()
