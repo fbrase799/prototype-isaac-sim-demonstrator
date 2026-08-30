@@ -15,7 +15,7 @@ Files:
 
 | Path | Role |
 | --- | --- |
-| `docker/Dockerfile.runpod` | NGC Isaac Sim 6.0.1 + SSH tools + `src/` |
+| `docker/Dockerfile.runpod` | NGC Isaac Sim 6.0.1 + SSH tools |
 | `docker/entrypoint.runpod.sh` | SSH (`PUBLIC_KEY`) and keep the pod running |
 | `.github/workflows/build-runpod-image.yml` | Build and push to GHCR and Docker Hub |
 
@@ -63,7 +63,10 @@ first if your account does not allow auto-create on push.
 
 1. Push this repository to GitHub.
 2. Add secrets `NGC_API_KEY`, `DOCKERHUB_USERNAME`, and `DOCKERHUB_TOKEN`.
-3. Push to `main`, or run **Actions → Build RunPod image**.
+3. A push to `main` rebuilds the image only if `Dockerfile.runpod`,
+   `entrypoint.runpod.sh`, or this workflow changed. Experiment scripts
+   do not trigger a rebuild. Use **Actions → Build RunPod image** to
+   run it by hand.
 4. For GHCR: in GitHub **Packages**, make the package public, or create a
    PAT with `read:packages`. Docker Hub images can be pulled with the usual
    `docker pull` if the repo is public.
@@ -83,9 +86,10 @@ Setting `ACCEPT_EULA=Y` in the Dockerfile accepts the
 - Expose SSH (port 22)
 - `ACCEPT_EULA=Y` is already set in the image
 
-SSH in, then run the experiments from `/workspace/isaac-sim-demonstrator`
-(see the project README). The image already contains `src/`. You can still
-`git pull` or `rsync` over it for faster iteration.
+SSH in, then clone this repo into `/workspace` and run from there (see the
+project README). The image is Isaac Sim + SSH only; it does not bake in
+`src/`. After a script change, `git pull` or `rsync` — you do not need a
+new image.
 
 ## Local Linux build (optional)
 

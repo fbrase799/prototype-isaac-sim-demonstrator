@@ -10,7 +10,8 @@ RunPod image that reports `6.0.1-rc.7`).
 APIs used: experimental Core (`Cube`, `RigidPrim`, `GroundPlane`) and
 `isaacsim.sensors.experimental.rtx` (`RtxCamera` + `CameraSensor`).
 
-To build the RunPod/GHCR image, see [docker/README.md](docker/README.md).
+The RunPod image is Isaac Sim + SSH; clone this repo onto the pod to get
+`src/`. Image rebuilds are documented in [docker/README.md](docker/README.md).
 
 ## Experiments
 

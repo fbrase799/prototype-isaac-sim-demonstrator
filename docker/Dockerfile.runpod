@@ -12,8 +12,7 @@ USER root
 
 ENV ACCEPT_EULA=Y \
     PRIVACY_CONSENT=Y \
-    DEBIAN_FRONTEND=noninteractive \
-    ISAAC_DEMO_OUTPUT=/workspace/isaac-sim-demonstrator/output
+    DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -27,13 +26,10 @@ RUN apt-get update \
 
 WORKDIR /workspace
 
-COPY src /workspace/isaac-sim-demonstrator/src
-COPY docker/run.sh /workspace/isaac-sim-demonstrator/docker/run.sh
+# Experiment scripts are not baked in. Clone or rsync the repo onto the pod.
 COPY docker/entrypoint.runpod.sh /usr/local/bin/entrypoint.runpod.sh
 
-RUN chmod +x /usr/local/bin/entrypoint.runpod.sh \
-        /workspace/isaac-sim-demonstrator/docker/run.sh \
-    && mkdir -p /workspace/isaac-sim-demonstrator/output
+RUN chmod +x /usr/local/bin/entrypoint.runpod.sh
 
 EXPOSE 22
 
