@@ -8,13 +8,15 @@ EXP="${1:-}"
 
 usage() {
   cat <<'EOF'
-Usage: docker/run.sh <exp01|exp02|exp03|exp04|all|shell>
+Usage: docker/run.sh <exp01|exp02|exp03|exp04|exp05|gui|all|shell>
 
   exp01   Headless startup and GPU detection
   exp02   Ground plane + rigid cube, stepped simulation
   exp03   Simulated camera RGB capture
   exp04   Move the cube and capture frames
-  all     Run exp01 through exp04 in order
+  exp05   Official Basic Usage Tutorial (visual + dynamic cubes)
+  gui     Remote GUI helper (start|isaac|smoke|status|probe|stop)
+  all     Run exp01 through exp05 in order (headless only)
   shell   Interactive bash in the Isaac Sim container
 EOF
 }
@@ -25,6 +27,7 @@ script_for() {
     exp02) echo "exp02_simple_scene.py" ;;
     exp03) echo "exp03_camera.py" ;;
     exp04) echo "exp04_motion.py" ;;
+    exp05) echo "exp05_basic_usage.py" ;;
     *) return 1 ;;
   esac
 }
@@ -84,14 +87,26 @@ if [[ "${EXP}" == "shell" ]]; then
   exit 0
 fi
 
+if [[ "${EXP}" == "gui" ]]; then
+  # Prefer the rsynced repo copy so a fresh pod works before the image rebuild.
+  if [[ -x "${ROOT}/docker/gui.sh" ]]; then
+    exec "${ROOT}/docker/gui.sh" "${@:2}"
+  fi
+  if [[ -x /usr/local/bin/isaac-gui.sh ]]; then
+    exec /usr/local/bin/isaac-gui.sh "${@:2}"
+  fi
+  echo "gui.sh not found. rsync the repo to /workspace." >&2
+  exit 1
+fi
+
 if [[ "${EXP}" == "all" ]]; then
   if in_isaac_container; then
-    for name in exp01 exp02 exp03 exp04; do
+    for name in exp01 exp02 exp03 exp04 exp05; do
       /isaac-sim/python.sh "${ROOT}/src/$(script_for "${name}")"
     done
     exit 0
   fi
-  for name in exp01 exp02 exp03 exp04; do
+  for name in exp01 exp02 exp03 exp04 exp05; do
     run_python "$(script_for "${name}")"
   done
   exit 0

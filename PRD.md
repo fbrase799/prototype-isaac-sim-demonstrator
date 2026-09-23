@@ -178,32 +178,33 @@ That screen is served over **TCP HTTP**, which RunPod’s proxy can
 carry.
 
 ```text
-Isaac Sim GUI
-    → Xvfb (or equivalent virtual display) on the GPU
-    → x11vnc (localhost VNC)
-    → websockify + noVNC (one HTTP port)
-    → RunPod HTTP proxy
-    → browser on the Mac
+Isaac Sim GUI (DISPLAY=:1)
+    → Xorg + NVIDIA dummy screen (not Xvfb)
+    → x11vnc (localhost :5900)
+    → websockify + noVNC (:8080)
+    → Mac SSH -L 8080 (TCP; not ssh.runpod.io)
+    → browser
 ```
+
+Xvfb cannot host Isaac 6 RTX (`advanceCurrentFrame: backbuffers are not
+initialized`). Proven 2026-08-30: Kit window, RTX 4090 overlay, ~76 FPS.
 
 Requirements:
 
-- One HTTP port on the pod (document the port; typical `8080`).
-- Virtual display resolution documented (for example `1920x1080`).
-- Password (or SSH tunnel) so the VNC endpoint is not open to the
-  world. NVIDIA livestream has no auth; do not copy that model.
+- RunPod template: RTX GPU, `22/tcp`, `NVIDIA_DRIVER_CAPABILITIES=all`.
+- Host-injected `nvidia_drv.so` (do not apt `xserver-xorg-video-nvidia-*`).
+- SSH tunnel so VNC is not on the public Internet. NVIDIA livestream
+  has no auth; do not copy that model.
 - Launch Kit **with a display** (`DISPLAY=:1`, not `--no-window` /
-  headless `SimulationApp`). GLFW must see an X server.
+  headless `SimulationApp`). GLFW must see Xorg.
 - Do not run a headless experiment (`python.sh src/exp0N_*.py`) at the
   same time as the GUI Kit process on a 24 GB GPU unless memory is
   confirmed free.
-- Document how to start/stop the desktop, how to open noVNC on the
-  Mac, and how to quit Isaac Sim from the streamed File menu.
+- `docker/gui.sh` starts Xorg, noVNC, and Isaac. The Dockerfile bakes
+  those packages; `gui start` can apt-install them on an older image.
 
-The image/entrypoint may gain Xvfb, x11vnc, noVNC/websockify, and a
-small desktop (or a script that installs them on first boot). That
-**does** change `Dockerfile.runpod` / `entrypoint.runpod.sh`, so it
-triggers an image rebuild. Experiment scripts still stay in git.
+That **does** change `Dockerfile.runpod` / `entrypoint.runpod.sh` /
+`gui.sh`, so it triggers an image rebuild. Experiment scripts stay in git.
 
 ### EXP-06 — Remote GUI session
 

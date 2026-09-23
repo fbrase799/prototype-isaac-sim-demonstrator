@@ -6,6 +6,7 @@ on:
     paths:
       - docker/Dockerfile.runpod
       - docker/entrypoint.runpod.sh
+      - docker/gui.sh
       - .github/workflows/build-runpod-image.yml
   workflow_dispatch:
 
