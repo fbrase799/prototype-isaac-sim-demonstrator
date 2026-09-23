@@ -1,0 +1,35 @@
+---
+description: Working RunPod Isaac GUI path (Xorg+NVIDIA+noVNC). Do not use Xvfb or WebRTC.
+alwaysApply: true
+---
+
+# RunPod remote GUI (proven 2026-08-30)
+
+Isaac Sim 6 GUI on RunPod works only as:
+
+```text
+Isaac (DISPLAY=:1) → Xorg + NVIDIA dummy screen → x11vnc :5900 → websockify/noVNC :8080 → Mac SSH -L 8080
+```
+
+Proven: Kit on RTX 4090 (~76 FPS) and RTX A6000. TCP SSH only (not `ssh.runpod.io` for tunnels).
+
+## Do not use
+
+- **Xvfb** — Kit logs `advanceCurrentFrame: backbuffers are not initialized!`
+- **NVIDIA WebRTC** (`runheadless.sh`, ports 49100/47998) — RunPod has no UDP ([docs](https://docs.runpod.io/pods/configuration/expose-ports)). Signaling works; viewport stays black.
+- **Xvfb / old `gui start`** — if `gui.sh` still launches Xvfb, stop it; this repo’s script starts Xorg.
+- Apt `xserver-xorg-video-nvidia-*` — version mismatch. `gui start` extracts `nvidia_drv.so` from the NVIDIA `.run` that matches `nvidia-smi` (e.g. 595.91.07). Cache: `/var/cache/isaac-gui/nvidia-xorg/<ver>` (survives pod stop/start, not terminate).
+
+## Required probe (before Xorg)
+
+`NVIDIA_DRIVER_CAPABILITIES=all`, `/dev/nvidia*`. `nvidia_drv.so` may be missing until `gui start`. `DISPLAY=:1 glxinfo -B` must show the **NVIDIA** GPU (4090, A6000, …), not llvmpipe. `/dev/dri/card*` is often unopenable (Permission denied); do not use modesetting.
+
+## Xorg
+
+BusID from `nvidia-smi` pci.bus_id. Config: Driver `nvidia`, `ConnectedMonitor` `DFP-0`, `MetaModes` `1920x1080` (dummy screen is otherwise **8×8**). Isaac: `DISPLAY=:1` `/isaac-sim/isaac-sim.sh --allow-root` with window 1920×1080. Template env `PUBLIC_KEY` = Mac `.pub` so TCP SSH works without a one-off authorized_keys paste.
+
+## Image vs live pod
+
+`./docker/run.sh gui` prefers `/workspace/docker/gui.sh` (rsync). `gui start` apt-installs Xorg/noVNC if the published image is old, then starts **Xorg**, not Xvfb. Rebuild the image so packages are baked in.
+
+Mac tunnel: `ssh -L 8080:127.0.0.1:8080 root@<PUBLIC_IP> -p <TCP_SSH_PORT> -i ~/.ssh/id_ed25519` then `http://127.0.0.1:8080/vnc.html?autoconnect=1`. Proxy SSH (`*@ssh.runpod.io`) cannot `-L`.

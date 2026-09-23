@@ -10,9 +10,9 @@ RunPod image that reports `6.0.1-rc.7`).
 APIs used: experimental Core (`Cube`, `RigidPrim`, `GroundPlane`) and
 `isaacsim.sensors.experimental.rtx` (`RtxCamera` + `CameraSensor`).
 
-The RunPod image is Isaac Sim + SSH + a virtual desktop for the GUI.
-Clone this repo onto the pod to get `src/`. Image rebuilds are documented
-in [docker/README.md](docker/README.md).
+The RunPod image is Isaac Sim + SSH + Xorg/noVNC for the GUI. Clone or
+rsync this repo onto the pod to get `src/` and `docker/gui.sh`. Image
+rebuilds are documented in [docker/README.md](docker/README.md).
 
 ## Experiments
 
@@ -68,43 +68,59 @@ The first Kit launch compiles shaders and can take several minutes.
 
 Isaac Sim renders on the RunPod GPU. The Mac only shows the window.
 
-NVIDIA’s WebRTC streaming client needs **UDP 47998**. RunPod does not
-forward UDP, so that client stays grey. Use noVNC over TCP instead.
-
-Rebuild the RunPod image after this change (Xvfb / noVNC packages). On
-the template, expose **HTTP or TCP 8080**. Optional env:
-
-- `VNC_PASSWORD` — VNC password (generated on first `start` if unset)
-- `ISAAC_GUI=1` — start the virtual desktop at pod boot (not Isaac Sim)
-
-On the pod:
-
-```bash
-./docker/run.sh gui start
-# or: isaac-gui.sh start
-
-./docker/run.sh gui smoke    # xclock; confirm the Mac browser first
-./docker/run.sh gui isaac    # Isaac Sim GUI; first load is slow
-./docker/run.sh gui status
+```text
+Isaac (DISPLAY=:1) → Xorg + NVIDIA dummy screen → x11vnc :5900 → noVNC :8080 → Mac SSH -L
 ```
 
-On the Mac, SSH tunnel (recommended):
+NVIDIA’s WebRTC client needs **UDP 47998**. RunPod does not forward UDP,
+so that client stays black. **Xvfb cannot host Isaac RTX** (`backbuffers
+are not initialized`). Use Xorg + NVIDIA + noVNC over **TCP SSH**.
+
+### Recreate a pod
+
+1. Deploy the RunPod image (Docker Hub tag after CI rebuild, or the
+   current image and let `gui start` apt-install Xorg/noVNC).
+2. Template: RTX 4090 (or other RTX with NVENC). Expose **22/tcp**.
+   Optional: `NVIDIA_DRIVER_CAPABILITIES=all`, `PUBLIC_KEY` (your
+   `~/.ssh/id_ed25519.pub` so TCP SSH works at boot), `VNC_PASSWORD`,
+   `ISAAC_GUI=1` (desktop at boot, not Isaac).
+   `gui start` apt-installs Xorg/noVNC if needed and extracts
+   `nvidia_drv.so` to match the host driver if it was not injected.
+3. Rsync this repo (use Connect → **SSH over exposed TCP**, not
+   `ssh.runpod.io`):
 
 ```bash
-ssh -L 8080:127.0.0.1:8080 <runpod-ssh> -i ~/.ssh/id_ed25519
+rsync -av --delete --no-owner --no-group --exclude .git --exclude .venv --exclude __pycache__ \
+  -e "ssh -i ~/.ssh/id_ed25519 -p <TCP_SSH_PORT>" \
+  ./ root@<PUBLIC_IP>:/workspace/
+```
+
+4. On the pod:
+
+```bash
+cd /workspace
+./docker/run.sh gui probe    # GPU, nvidia_drv.so, /dev/dri
+./docker/run.sh gui start    # installs packages if the image is old
+./docker/run.sh gui smoke    # xclock on the desktop
+./docker/run.sh gui isaac    # Kit; first load is slow
+./docker/run.sh gui status   # VNC password
+```
+
+5. On the Mac (keep this tunnel open):
+
+```bash
+ssh -L 8080:127.0.0.1:8080 root@<PUBLIC_IP> -p <TCP_SSH_PORT> -i ~/.ssh/id_ed25519
 open http://127.0.0.1:8080/vnc.html?autoconnect=1
 ```
 
-Enter the VNC password from `gui status`. You should get an interactive
-Kit window. `nvidia-smi` on the pod should show `kit`.
+Enter the password from `gui status`. You want the Openbox desktop, then
+a Kit window (viewport overlay names the RTX GPU). `nvidia-smi` shows
+`kit`.
 
-If you exposed port 8080 on the RunPod proxy instead:
+Proxy SSH (`*@ssh.runpod.io`) cannot `-L`. Do not publish 8080 unless you
+set `VNC_PASSWORD`.
 
-```text
-https://<POD_ID>-8080.proxy.runpod.net/vnc.html?autoconnect=1
-```
-
-Quit with **File > Exit** in the streamed app, then `./docker/run.sh gui stop`.
+Quit with **File > Exit**, then `./docker/run.sh gui stop`.
 To also kill Kit: `./docker/run.sh gui stop --isaac`.
 
 ## Official GUI tab (EXP-07)
@@ -176,10 +192,13 @@ isaac-sim-demonstrator/
 | First start takes 5–15 minutes | Expected shader compile |
 | `Destroying busy TaskGroup` / core dump after complete | Kit shutdown bug; ignore if you already saw `EXP-0N complete`. Scripts now exit without `close()`. |
 | SSH `closed by remote host` during Kit start | Do not launch a second `python.sh` after a crash. Reconnect, run `nvidia-smi`, kill leftover `kit` processes, then start one experiment. A core dump can fill the pod disk. |
-| GLFW initialization failed / no Kit window | GUI needs `docker/gui.sh start` so `DISPLAY` exists. Headless `python.sh` scripts are supposed to run without a window. |
-| WebRTC client grey/black screen | Expected on RunPod. Use noVNC (`gui start`), not the NVIDIA streaming client. |
+| GLFW initialization failed / no Kit window | Run `gui start` first so Xorg is on `DISPLAY=:1`. Headless `python.sh` does not need a window. |
+| WebRTC client grey/black screen | Expected on RunPod (no UDP). Use noVNC, not the NVIDIA streaming client. |
+| `backbuffers are not initialized` | Xvfb is running, or `gui start` is an old script. Stop it and use this repo’s Xorg `gui.sh`. |
+| `glxinfo` shows llvmpipe | NVIDIA X driver not presenting. `gui probe`; do not apt-install `xserver-xorg-video-nvidia-*`. |
+| SSH `-L` “unsupported channel” | You used `ssh.runpod.io`. Use the public IP and TCP port from Connect. |
+| noVNC Connection refused | `gui start` is not up, or the tunnel is to the wrong host. `gui status`. |
 | noVNC asks for a password | `./docker/run.sh gui status` prints it (or `VNC_PASSWORD`). |
-| `Missing Xvfb` | Current pod image is older than this change. Wait for GH Actions rebuild, pull the new tag. |
 | Two Kit processes / SSH drop | Stop GUI or headless before starting the other. `gui stop --isaac` then `nvidia-smi`. |
 
 ## Success criteria

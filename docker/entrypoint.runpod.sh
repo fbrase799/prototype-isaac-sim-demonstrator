@@ -25,6 +25,11 @@ if [[ -x /usr/sbin/sshd ]]; then
   /usr/sbin/sshd
 fi
 
+# Optional NVIDIA Xorg + noVNC desktop for EXP-06. Does not start Isaac Sim.
+if [[ "${ISAAC_GUI:-}" == "1" && -x /usr/local/bin/isaac-gui.sh ]]; then
+  /usr/local/bin/isaac-gui.sh start || true
+fi
+
 if [[ "$#" -gt 0 ]]; then
   exec "$@"
 fi
