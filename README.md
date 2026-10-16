@@ -14,70 +14,36 @@ The RunPod image is Isaac Sim + SSH + Xorg/noVNC for the GUI. Clone or
 rsync this repo onto the pod to get `src/` and `docker/gui.sh`. Image
 rebuilds are documented in [docker/README.md](docker/README.md).
 
-Python lives under `src/<origin>/`. Add a later course as
-`src/udemy_tutorial/` (or similar); do not mix origins in one folder.
+Python lives under `src/<origin>/`. Do not mix origins in one folder.
 
-## Environment Check
-
-This repo’s GPU smoke tests (`src/environment_check/`). They prove the
-cloud Isaac Sim stack before any official tutorial.
-
-| Script | PRD item | What it does |
-| --- | --- | --- |
-| `01_startup.py` | EXP-01 | Headless Kit start, GPU check, a few app updates |
-| `02_simple_scene.py` | EXP-02 | Ground plane + rigid cube, 120 physics steps |
-| `03_camera.py` | EXP-03 | Camera looking at the cube, PNG under `output/` |
-| `04_motion.py` | EXP-04 | Apply cube velocity, save a short RGB sequence |
-
-## Isaac Tutorial
-
-NVIDIA [Basic Usage](https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/quickstart_isaacsim.html)
-(`src/isaac_tutorial/`), plus the remote GUI needed to follow the GUI
-and Script Editor tabs.
-
-| Script | PRD item | What it does |
-| --- | --- | --- |
-| `01_basic_usage.py` | EXP-05 | NVIDIA `getting_started.py` with `headless=True` and an exit after the loop |
-| `docker/gui.sh` | EXP-06 | Isaac Sim GUI on the cloud GPU, viewed on a Mac via noVNC (TCP) |
-| *(Kit GUI)* | EXP-07 | Official GUI tab: menus, gizmos, Play |
-| `script_editor/*.py` | EXP-08 | Official Script Editor snippets (paste into Kit, do not run with `python.sh`) |
+| Origin | README |
+| --- | --- |
+| Environment Check | [src/environment_check/README.md](src/environment_check/README.md) |
+| Isaac Tutorial | [src/isaac_tutorial/README.md](src/isaac_tutorial/README.md) |
+| Udemy: NVIDIA Isaac Sim from Scratch | [src/udemy_nvidia_isaacsim_from_scratch/README.md](src/udemy_nvidia_isaacsim_from_scratch/README.md) |
 
 Out of scope for this version: PX4, ROS 2, drones, LiDAR, Isaac Lab, RL,
-NVIDIA WebRTC livestream on RunPod (UDP is not forwarded).
+NVIDIA WebRTC livestream on RunPod (UDP is not forwarded). The Udemy
+origin has its own ROS 2 / Replicator / RL scripts; those are course
+assets, not this repo’s Phase 1 scope.
 
 ## Run
 
 From an Isaac Sim 6.0.1 container (`/isaac-sim/python.sh` exists), at the
-repo root:
+repo root. Script lists and commands are in each origin README.
 
 ```bash
 chmod +x docker/run.sh
-./docker/run.sh 01_startup
-./docker/run.sh 02_simple_scene
-./docker/run.sh 03_camera
-./docker/run.sh 04_motion
-./docker/run.sh 01_basic_usage
-```
-
-Headless experiments each start their **own** Kit process. Do not run them
-while the GUI Kit from EXP-06 is using the GPU.
-
-Or all five headless experiments, in order:
-
-```bash
 ./docker/run.sh all
 ```
 
-Equivalent direct calls:
+`all` runs Environment Check `01`–`04` then Isaac Tutorial
+`01_basic_usage`. Headless experiments each start their **own** Kit
+process. Do not run them while the GUI Kit from EXP-06 is using the GPU.
 
-```bash
-/isaac-sim/python.sh "$PWD/src/environment_check/01_startup.py"
-/isaac-sim/python.sh "$PWD/src/environment_check/03_camera.py"
-```
-
-`docker/run.sh` uses `/isaac-sim/python.sh` automatically when that file exists.
-
-The first Kit launch compiles shaders and can take several minutes.
+`docker/run.sh` uses `/isaac-sim/python.sh` automatically when that file
+exists. The first Kit launch compiles shaders and can take several
+minutes.
 
 ## Remote GUI (EXP-06)
 
@@ -138,52 +104,8 @@ set `VNC_PASSWORD`.
 Quit with **File > Exit**, then `./docker/run.sh gui stop`.
 To also kill Kit: `./docker/run.sh gui stop --isaac`.
 
-## Official GUI tab (EXP-07)
-
-With the EXP-06 session open, follow the
-[Basic Usage Tutorial GUI tab](https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/quickstart_isaacsim.html):
-
-1. File > New
-2. Create > Physics > Ground Plane
-3. Create > Lights > Distant Light
-4. Create > Shape > Cube (Play: the cube should not fall)
-5. W / E / R gizmos, or type values in the Property panel
-6. Select `/World/Cube` → Property panel → Add → Physics →
-   **Rigid Body with Colliders Preset**
-7. Play: the cube falls onto the ground
-
-Optional: save a Mac screenshot under `output/`.
-
-## Official Script Editor tab (EXP-08)
-
-Still in the EXP-06 session: **Window > Script Editor**. Open a new tab
-for each file under `src/isaac_tutorial/script_editor/`, paste, Run, in this order:
-
-| File | What it does |
-| --- | --- |
-| `01_ground_plane.py` | New stage + ground |
-| `02_distant_light.py` | Distant light intensity 300 |
-| `03_visual_cubes.py` | Yellow visual cube + cyan test cube |
-| `04_usd_cube.py` | Optional raw USD cube |
-| `05_dynamic_cube.py` | Red cube with rigid body + collision |
-| `06_physics_on_test_cube.py` | Physics on `/test_cube` |
-| `07_xform.py` | Move / rotate / scale `/test_cube` |
-
-Play: visual cubes stay put; cyan/red cubes fall. Edit a snippet, save,
-re-run — that is hot-reload. Do **not** run these files with
-`/isaac-sim/python.sh`.
-
-## Retrieve images
-
-After EXP-03 / EXP-04 / EXP-05:
-
-```text
-output/03_rgb.png
-output/04_frame_01.png
-...
-```
-
-Copy them to your laptop with `scp` or the RunPod file browser.
+GUI and Script Editor tabs for NVIDIA Basic Usage:
+[src/isaac_tutorial/README.md](src/isaac_tutorial/README.md).
 
 ## Layout
 
@@ -191,8 +113,9 @@ Copy them to your laptop with `scp` or the RunPod file browser.
 isaac-sim-demonstrator/
 ├── docker/                 # Run helper, gui.sh; image notes in docker/README.md
 ├── src/
-│   ├── environment_check/  # EXP-01–04 GPU / scene / camera smoke tests
-│   └── isaac_tutorial/     # 01_basic_usage.py + script_editor/ snippets
+│   ├── environment_check/                  # GPU smoke tests + README
+│   ├── isaac_tutorial/                     # NVIDIA Basic Usage + README
+│   └── udemy_nvidia_isaacsim_from_scratch/ # Udemy course assets + README
 ├── output/                 # Generated RGB images (gitignored)
 ├── PRD.md
 ├── README.md
