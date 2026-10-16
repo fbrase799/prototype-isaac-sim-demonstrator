@@ -131,7 +131,7 @@ NGC image instead of the GHCR or Docker Hub image:
 ```bash
 docker login nvcr.io
 docker pull nvcr.io/nvidia/isaac-sim:6.0.1
-./docker/run.sh exp01
+./docker/run.sh 01_startup
 ```
 
 Confirm GPU passthrough:

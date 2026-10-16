@@ -8,26 +8,26 @@ EXP="${1:-}"
 
 usage() {
   cat <<'EOF'
-Usage: docker/run.sh <exp01|exp02|exp03|exp04|exp05|gui|all|shell>
+Usage: docker/run.sh <01_startup|02_simple_scene|03_camera|04_motion|01_basic_usage|gui|all|shell>
 
-  exp01   Headless startup and GPU detection
-  exp02   Ground plane + rigid cube, stepped simulation
-  exp03   Simulated camera RGB capture
-  exp04   Move the cube and capture frames
-  exp05   Official Basic Usage Tutorial (visual + dynamic cubes)
-  gui     Remote GUI helper (start|isaac|smoke|status|probe|stop)
-  all     Run exp01 through exp05 in order (headless only)
-  shell   Interactive bash in the Isaac Sim container
+  01_startup        Headless startup and GPU detection
+  02_simple_scene   Ground plane + rigid cube, stepped simulation
+  03_camera         Simulated camera RGB capture
+  04_motion         Move the cube and capture frames
+  01_basic_usage    Official Basic Usage Tutorial (visual + dynamic cubes)
+  gui               Remote GUI helper (start|isaac|smoke|status|probe|stop)
+  all               Run environment_check 01–04 then isaac_tutorial 01 (headless)
+  shell             Interactive bash in the Isaac Sim container
 EOF
 }
 
 script_for() {
   case "$1" in
-    exp01) echo "exp01_startup.py" ;;
-    exp02) echo "exp02_simple_scene.py" ;;
-    exp03) echo "exp03_camera.py" ;;
-    exp04) echo "exp04_motion.py" ;;
-    exp05) echo "exp05_basic_usage.py" ;;
+    01_startup) echo "environment_check/01_startup.py" ;;
+    02_simple_scene) echo "environment_check/02_simple_scene.py" ;;
+    03_camera) echo "environment_check/03_camera.py" ;;
+    04_motion) echo "environment_check/04_motion.py" ;;
+    01_basic_usage) echo "isaac_tutorial/01_basic_usage.py" ;;
     *) return 1 ;;
   esac
 }
@@ -101,12 +101,12 @@ fi
 
 if [[ "${EXP}" == "all" ]]; then
   if in_isaac_container; then
-    for name in exp01 exp02 exp03 exp04 exp05; do
+    for name in 01_startup 02_simple_scene 03_camera 04_motion 01_basic_usage; do
       /isaac-sim/python.sh "${ROOT}/src/$(script_for "${name}")"
     done
     exit 0
   fi
-  for name in exp01 exp02 exp03 exp04 exp05; do
+  for name in 01_startup 02_simple_scene 03_camera 04_motion 01_basic_usage; do
     run_python "$(script_for "${name}")"
   done
   exit 0

@@ -92,7 +92,7 @@ exactly (prim paths, APIs, numbers) rather than inventing a simpler scene.
 
 It is acceptable to run NVIDIA’s `getting_started.py` as a first check if
 it starts headless in this container. The deliverable is still a script
-under `src/` that:
+under `src/isaac_tutorial/` that:
 
 - Starts `SimulationApp` headless (same pattern as EXP-01–04).
 - Uses Isaac Sim 6.0 experimental Core APIs (not Isaac Lab spawners).
@@ -197,7 +197,7 @@ Requirements:
   has no auth; do not copy that model.
 - Launch Kit **with a display** (`DISPLAY=:1`, not `--no-window` /
   headless `SimulationApp`). GLFW must see Xorg.
-- Do not run a headless experiment (`python.sh src/exp0N_*.py`) at the
+- Do not run a headless experiment (`python.sh src/environment_check/0N_*.py` or `src/isaac_tutorial/01_basic_usage.py`) at the
   same time as the GUI Kit process on a 24 GB GPU unless memory is
   confirmed free.
 - `docker/gui.sh` starts Xorg, noVNC, and Isaac. The Dockerfile bakes
@@ -284,6 +284,8 @@ particular cloud VM.
 isaac-sim-demonstrator/
 ├── docker/
 ├── src/
+│   ├── environment_check/
+│   └── isaac_tutorial/
 ├── output/
 ├── PRD.md
 ├── README.md

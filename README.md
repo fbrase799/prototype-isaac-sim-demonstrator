@@ -14,18 +14,33 @@ The RunPod image is Isaac Sim + SSH + Xorg/noVNC for the GUI. Clone or
 rsync this repo onto the pod to get `src/` and `docker/gui.sh`. Image
 rebuilds are documented in [docker/README.md](docker/README.md).
 
-## Experiments
+Python lives under `src/<origin>/`. Add a later course as
+`src/udemy_tutorial/` (or similar); do not mix origins in one folder.
+
+## Environment Check
+
+This repo’s GPU smoke tests (`src/environment_check/`). They prove the
+cloud Isaac Sim stack before any official tutorial.
 
 | Script | PRD item | What it does |
 | --- | --- | --- |
-| `src/exp01_startup.py` | EXP-01 | Headless Kit start, GPU check, a few app updates |
-| `src/exp02_simple_scene.py` | EXP-02 | Ground plane + rigid cube, 120 physics steps |
-| `src/exp03_camera.py` | EXP-03 | Camera looking at the cube, PNG under `output/` |
-| `src/exp04_motion.py` | EXP-04 | Apply cube velocity, save a short RGB sequence |
-| `src/exp05_basic_usage.py` | EXP-05 | NVIDIA `getting_started.py` with `headless=True` and an exit after the loop |
+| `01_startup.py` | EXP-01 | Headless Kit start, GPU check, a few app updates |
+| `02_simple_scene.py` | EXP-02 | Ground plane + rigid cube, 120 physics steps |
+| `03_camera.py` | EXP-03 | Camera looking at the cube, PNG under `output/` |
+| `04_motion.py` | EXP-04 | Apply cube velocity, save a short RGB sequence |
+
+## Isaac Tutorial
+
+NVIDIA [Basic Usage](https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/quickstart_isaacsim.html)
+(`src/isaac_tutorial/`), plus the remote GUI needed to follow the GUI
+and Script Editor tabs.
+
+| Script | PRD item | What it does |
+| --- | --- | --- |
+| `01_basic_usage.py` | EXP-05 | NVIDIA `getting_started.py` with `headless=True` and an exit after the loop |
 | `docker/gui.sh` | EXP-06 | Isaac Sim GUI on the cloud GPU, viewed on a Mac via noVNC (TCP) |
 | *(Kit GUI)* | EXP-07 | Official GUI tab: menus, gizmos, Play |
-| `src/exp08/*.py` | EXP-08 | Official Script Editor snippets (paste into Kit, do not run with `python.sh`) |
+| `script_editor/*.py` | EXP-08 | Official Script Editor snippets (paste into Kit, do not run with `python.sh`) |
 
 Out of scope for this version: PX4, ROS 2, drones, LiDAR, Isaac Lab, RL,
 NVIDIA WebRTC livestream on RunPod (UDP is not forwarded).
@@ -37,11 +52,11 @@ repo root:
 
 ```bash
 chmod +x docker/run.sh
-./docker/run.sh exp01
-./docker/run.sh exp02
-./docker/run.sh exp03
-./docker/run.sh exp04
-./docker/run.sh exp05
+./docker/run.sh 01_startup
+./docker/run.sh 02_simple_scene
+./docker/run.sh 03_camera
+./docker/run.sh 04_motion
+./docker/run.sh 01_basic_usage
 ```
 
 Headless experiments each start their **own** Kit process. Do not run them
@@ -56,8 +71,8 @@ Or all five headless experiments, in order:
 Equivalent direct calls:
 
 ```bash
-/isaac-sim/python.sh "$PWD/src/exp01_startup.py"
-/isaac-sim/python.sh "$PWD/src/exp03_camera.py"
+/isaac-sim/python.sh "$PWD/src/environment_check/01_startup.py"
+/isaac-sim/python.sh "$PWD/src/environment_check/03_camera.py"
 ```
 
 `docker/run.sh` uses `/isaac-sim/python.sh` automatically when that file exists.
@@ -142,7 +157,7 @@ Optional: save a Mac screenshot under `output/`.
 ## Official Script Editor tab (EXP-08)
 
 Still in the EXP-06 session: **Window > Script Editor**. Open a new tab
-for each file under `src/exp08/`, paste, Run, in this order:
+for each file under `src/isaac_tutorial/script_editor/`, paste, Run, in this order:
 
 | File | What it does |
 | --- | --- |
@@ -163,8 +178,8 @@ re-run — that is hot-reload. Do **not** run these files with
 After EXP-03 / EXP-04 / EXP-05:
 
 ```text
-output/exp03_rgb.png
-output/exp04_frame_01.png
+output/03_rgb.png
+output/04_frame_01.png
 ...
 ```
 
@@ -175,7 +190,9 @@ Copy them to your laptop with `scp` or the RunPod file browser.
 ```text
 isaac-sim-demonstrator/
 ├── docker/                 # Run helper, gui.sh; image notes in docker/README.md
-├── src/                    # Headless experiments + src/exp08 Script Editor snippets
+├── src/
+│   ├── environment_check/  # EXP-01–04 GPU / scene / camera smoke tests
+│   └── isaac_tutorial/     # 01_basic_usage.py + script_editor/ snippets
 ├── output/                 # Generated RGB images (gitignored)
 ├── PRD.md
 ├── README.md

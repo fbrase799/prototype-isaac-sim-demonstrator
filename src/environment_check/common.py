@@ -14,7 +14,7 @@ from typing import Optional, Sequence, Tuple
 
 import numpy as np
 
-_REPO_OUTPUT = Path(__file__).resolve().parent.parent / "output"
+_REPO_OUTPUT = Path(__file__).resolve().parent.parent.parent / "output"
 OUTPUT_DIR = Path(os.environ.get("ISAAC_DEMO_OUTPUT", str(_REPO_OUTPUT)))
 
 

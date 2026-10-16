@@ -71,7 +71,7 @@ On the Mac, use TCP SSH (Connect → SSH over exposed TCP), not ssh.runpod.io:
   ssh -L ${NOVNC_PORT}:127.0.0.1:${NOVNC_PORT} root@<PUBLIC_IP> -p <TCP_PORT> -i ~/.ssh/id_ed25519
   open http://127.0.0.1:${NOVNC_PORT}/vnc.html?autoconnect=1
 
-Do not run docker/run.sh exp0N while Kit GUI is using the GPU.
+Do not run docker/run.sh 01_startup (or other headless scripts) while Kit GUI is using the GPU.
 Quit Isaac Sim with File > Exit in the streamed window, then: docker/gui.sh stop
 EOF
 }

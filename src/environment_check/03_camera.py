@@ -30,7 +30,7 @@ sensor = add_rgb_camera()
 play_simulation()
 
 rgb = wait_for_rgb(sensor)
-image_path = output_dir() / "exp03_rgb.png"
+image_path = output_dir() / "03_rgb.png"
 save_rgb(rgb, image_path)
 log(f"EXP-03 complete: {image_path}")
 finish()

@@ -57,7 +57,7 @@ for index in range(1, STEPS + 1):
     if rgb is None:
         rgb = wait_for_rgb(sensor, max_warmup_steps=8)
     captures += 1
-    save_rgb(rgb, out / f"exp04_frame_{captures:02d}.png")
+    save_rgb(rgb, out / f"04_frame_{captures:02d}.png")
 
 log(f"EXP-04 complete: wrote {captures} frames under {out}")
 finish()
